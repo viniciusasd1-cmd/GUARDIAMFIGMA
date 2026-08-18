@@ -1,0 +1,20 @@
+--- src/app/components/guardiam/screens.tsx
++++ src/app/components/guardiam/screens.tsx
+@@ -124,6 +128,17 @@
+       </div>
+ 
++      {/* Smart features (V2) */}
++      <SectionTitle>Ações rápidas</SectionTitle>
++      <div className="px-5 grid grid-cols-2 gap-3 mt-3">
++         <Card onClick={() => onNav("fake-call")} className="p-4 flex flex-col items-center justify-center text-center gap-2 cursor-pointer" raised style={{ border: "1px solid var(--g-border-strong)" }}>
++            <PhoneCall size={24} style={{ color: "var(--g-brand)" }} />
++            <span style={{ color: "var(--g-text)", fontSize: 13, fontWeight: 600 }}>Ligação falsa</span>
++         </Card>
++         <Card className="p-4 flex flex-col items-center justify-center text-center gap-2 opacity-50 pointer-events-none" raised style={{ border: "1px solid var(--g-border-strong)" }}>
++            <Footprints size={24} style={{ color: "var(--g-brand)" }} />
++            <span style={{ color: "var(--g-text)", fontSize: 13, fontWeight: 600 }}>Trajeto seguro</span>
++         </Card>
++      </div>
++
+       {/* Quick access */}
+       <div className="px-5 mt-3">

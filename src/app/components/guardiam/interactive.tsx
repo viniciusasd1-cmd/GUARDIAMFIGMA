@@ -1,0 +1,206 @@
+import { AnimatePresence, motion } from "motion/react";
+import { useRef, useState } from "react";
+import {
+  Home,
+  Shield,
+  Users,
+  Bell,
+  Settings,
+  X,
+  type LucideIcon,
+} from "lucide-react";
+import { ShieldMark } from "./ui";
+
+/* ------------------------------------------------------------------ */
+/* Slide-over navigation menu                                          */
+/* ------------------------------------------------------------------ */
+export type ScreenKey =
+  | "home"
+  | "activate"
+  | "active"
+  | "sos"
+  | "contacts"
+  | "alerts"
+  | "settings"
+  | "discrete-settings";
+
+const items: { key: ScreenKey; label: string; icon: LucideIcon }[] = [
+  { key: "home", label: "Início", icon: Home },
+  { key: "activate", label: "Proteção", icon: Shield },
+  { key: "contacts", label: "Contatos de segurança", icon: Users },
+  { key: "alerts", label: "Alertas", icon: Bell },
+  { key: "settings", label: "Configurações", icon: Settings },
+];
+
+export function Menu({
+  open,
+  onClose,
+  current,
+  onNavigate,
+}: {
+  open: boolean;
+  onClose: () => void;
+  current: ScreenKey;
+  onNavigate: (s: ScreenKey) => void;
+}) {
+  return (
+    <AnimatePresence>
+      {open && (
+        <>
+          <motion.div
+            className="absolute inset-0 z-40"
+            style={{ background: "rgba(4,10,20,0.6)", backdropFilter: "blur(2px)" }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+          />
+          <motion.div
+            className="absolute top-0 right-0 bottom-0 z-50 flex flex-col"
+            style={{
+              width: "78%",
+              background: "var(--g-surface)",
+              borderLeft: "1px solid var(--g-border)",
+              paddingTop: "env(safe-area-inset-top, 12px)",
+            }}
+            initial={{ x: "100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "100%" }}
+            transition={{ type: "spring", damping: 28, stiffness: 280 }}
+          >
+            <div className="flex items-center justify-between px-5 pt-4 pb-6">
+              <div className="flex items-center gap-2.5">
+                <ShieldMark size={30} />
+                <span className="g-font-display tracking-[0.14em]" style={{ color: "var(--g-text)", fontWeight: 800 }}>
+                  GUARDIAM
+                </span>
+              </div>
+              <button onClick={onClose} className="active:scale-90 transition-transform" style={{ color: "var(--g-text-2)" }}>
+                <X size={24} />
+              </button>
+            </div>
+            <nav className="flex flex-col gap-1 px-3">
+              {items.map((it) => {
+                const active = it.key === current;
+                return (
+                  <button
+                    key={it.key}
+                    onClick={() => {
+                      onNavigate(it.key);
+                      onClose();
+                    }}
+                    className="flex items-center gap-3.5 rounded-[14px] px-4 active:scale-[0.98] transition-transform"
+                    style={{
+                      height: 52,
+                      background: active ? "var(--g-brand-soft)" : "transparent",
+                      color: active ? "var(--g-brand)" : "var(--g-text-2)",
+                      fontWeight: active ? 600 : 500,
+                      fontSize: 15,
+                    }}
+                  >
+                    <it.icon size={20} strokeWidth={2.3} />
+                    {it.label}
+                  </button>
+                );
+              })}
+            </nav>
+            <div className="mt-auto px-5 pb-8" style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 28px)" }}>
+              <div style={{ color: "var(--g-text-3)", fontSize: 12 }}>GUARDIAM · v1.0</div>
+              <div style={{ color: "var(--g-text-3)", fontSize: 12, marginTop: 2 }}>Sua central pessoal de proteção.</div>
+            </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* SOS button — hold 3 seconds to trigger                              */
+/* ------------------------------------------------------------------ */
+export function SOSButton({ onTrigger }: { onTrigger: () => void }) {
+  const [progress, setProgress] = useState(0);
+  const [holding, setHolding] = useState(false);
+  const raf = useRef<number | null>(null);
+  const start = useRef(0);
+  const DURATION = 3000;
+
+  const tick = () => {
+    const p = Math.min((Date.now() - start.current) / DURATION, 1);
+    setProgress(p);
+    if (p >= 1) {
+      cancel();
+      onTrigger();
+      return;
+    }
+    raf.current = requestAnimationFrame(tick);
+  };
+
+  const begin = () => {
+    setHolding(true);
+    start.current = Date.now();
+    raf.current = requestAnimationFrame(tick);
+  };
+
+  const cancel = () => {
+    setHolding(false);
+    if (raf.current) cancelAnimationFrame(raf.current);
+    setProgress(0);
+  };
+
+  const R = 96;
+  const C = 2 * Math.PI * R;
+
+  return (
+    <div className="flex flex-col items-center gap-4 select-none">
+      <div className="relative" style={{ width: 220, height: 220 }}>
+        {/* pulsing halo */}
+        <motion.div
+          className="absolute rounded-full"
+          style={{ inset: 14, background: "var(--g-sos-soft)" }}
+          animate={holding ? { scale: [1, 1.06], opacity: [0.5, 0.9] } : { scale: [1, 1.12, 1], opacity: [0.4, 0.15, 0.4] }}
+          transition={{ duration: holding ? 0.6 : 2.4, repeat: Infinity }}
+        />
+        {/* progress ring */}
+        <svg className="absolute inset-0 -rotate-90" width={220} height={220}>
+          <circle cx={110} cy={110} r={R} fill="none" stroke="var(--g-surface-3)" strokeWidth={8} />
+          <circle
+            cx={110}
+            cy={110}
+            r={R}
+            fill="none"
+            stroke="var(--g-sos)"
+            strokeWidth={8}
+            strokeLinecap="round"
+            strokeDasharray={C}
+            strokeDashoffset={C * (1 - progress)}
+          />
+        </svg>
+        {/* button */}
+        <motion.button
+          onPointerDown={begin}
+          onPointerUp={cancel}
+          onPointerLeave={cancel}
+          whileTap={{ scale: 0.96 }}
+          className="absolute flex flex-col items-center justify-center rounded-full"
+          style={{
+            inset: 34,
+            background: "linear-gradient(150deg, #FF5A5F, #E23B4E)",
+            boxShadow: "var(--g-shadow-glow-sos)",
+            color: "#fff",
+          }}
+        >
+          <span className="g-font-display" style={{ fontWeight: 800, fontSize: 40, letterSpacing: "0.06em" }}>
+            SOS
+          </span>
+          <span style={{ fontSize: 12, opacity: 0.9, fontWeight: 500 }}>
+            {holding ? "Continue segurando..." : "Segurar"}
+          </span>
+        </motion.button>
+      </div>
+      <p style={{ color: "var(--g-text-2)", fontSize: 14, textAlign: "center" }}>
+        Segure por 3 segundos para pedir ajuda
+      </p>
+    </div>
+  );
+}

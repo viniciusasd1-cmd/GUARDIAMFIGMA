@@ -1,0 +1,249 @@
+import { useState, useRef, useEffect } from "react";
+import { AnimatePresence, motion, useAnimation } from "motion/react";
+import { Header } from "./components/guardiam/ui";
+import { Menu, type ScreenKey } from "./components/guardiam/interactive";
+import {
+  HomeScreen,
+  ActivationScreen,
+  ActiveScreen,
+  SOSScreen,
+  ContactsScreen,
+  AlertsScreen,
+  SettingsScreen,
+  DiscreteButtonSettingsScreen
+} from "./components/guardiam/screens";
+import { LoginScreen } from "./components/guardiam/LoginScreen";
+import { initialContacts, initialAlerts } from "./components/guardiam/data";
+
+export default function App() {
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [screen, setScreen] = useState<ScreenKey | "discrete-settings">("home");
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [active, setActive] = useState(false);
+  const [theme, setTheme] = useState<"dark" | "light">("dark");
+
+  const [contacts] = useState(initialContacts);
+  const [alerts] = useState(initialAlerts);
+
+  // Discrete button state
+  const [discreteEnabled, setDiscreteEnabled] = useState(true);
+  const [discreteEmoji, setDiscreteEmoji] = useState("🛡️");
+
+  const go = (s: any) => setScreen(s);
+
+  const renderScreen = () => {
+    switch (screen) {
+      case "home":
+        return (
+          <HomeScreen
+            active={active}
+            contactsCount={contacts.length}
+            onActivate={() => go("activate")}
+            onOpenActive={() => go("active")}
+            onNav={go}
+          />
+        );
+      case "activate":
+        return (
+          <ActivationScreen
+            contactsCount={contacts.length}
+            onBack={() => go("home")}
+            onActivate={() => {
+              setActive(true);
+              go("active");
+            }}
+          />
+        );
+      case "active":
+        return (
+          <ActiveScreen
+            onSOS={() => go("sos")}
+            onBack={() => go("home")}
+            onDeactivate={() => {
+              setActive(false);
+              go("home");
+            }}
+          />
+        );
+      case "sos":
+        return <SOSScreen onSafe={() => go("active")} onBack={() => go("active")} />;
+      case "contacts":
+        return <ContactsScreen contacts={contacts} onBack={() => go("home")} />;
+      case "alerts":
+        return <AlertsScreen alerts={alerts} onBack={() => go("home")} />;
+      case "settings":
+        return <SettingsScreen onBack={() => go("home")} onNav={go} onLogout={() => setLoggedIn(false)} theme={theme} onToggleTheme={() => setTheme(theme === "dark" ? "light" : "dark")} />;
+      case "discrete-settings":
+        return (
+          <DiscreteButtonSettingsScreen
+            enabled={discreteEnabled}
+            onToggleEnabled={() => setDiscreteEnabled(!discreteEnabled)}
+            emoji={discreteEmoji}
+            onSetEmoji={setDiscreteEmoji}
+            onBack={() => go("settings")}
+          />
+        );
+    }
+  };
+
+  // Full-bleed screens (no app header): login + sos
+  const bare = screen === "sos";
+
+  // Discrete Button Logic
+  const [pressing, setPressing] = useState(false);
+  const pressTimer = useRef<NodeJS.Timeout | null>(null);
+  const progressControls = useAnimation();
+
+  const handlePointerDown = () => {
+    setPressing(true);
+    progressControls.start({
+      pathLength: 1,
+      transition: { duration: 3, ease: "linear" }
+    });
+    pressTimer.current = setTimeout(() => {
+      // Trigger SOS
+      setPressing(false);
+      progressControls.stop();
+      progressControls.set({ pathLength: 0 });
+      go("sos");
+      // Haptic feedback simulation
+      if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+    }, 3000);
+  };
+
+  const handlePointerUpOrCancel = () => {
+    if (pressTimer.current) {
+      clearTimeout(pressTimer.current);
+      pressTimer.current = null;
+    }
+    setPressing(false);
+    progressControls.stop();
+    progressControls.start({ pathLength: 0, transition: { duration: 0.3 } });
+  };
+
+  // Only show discrete button if enabled, logged in, and not in SOS screen
+  const showDiscreteButton = loggedIn && discreteEnabled && screen !== "sos" && screen !== "discrete-settings";
+
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  return (
+    <div className="size-full flex items-center justify-center" style={{ background: theme === "light" ? "#E0E5EC" : "#05080F", transition: "background 0.3s" }}>
+      {/* Phone frame */}
+      <div
+        ref={containerRef}
+        className={`relative overflow-hidden flex flex-col w-full h-[100dvh] sm:w-[390px] sm:h-[844px] sm:max-h-[100dvh] sm:rounded-[36px] sm:shadow-2xl transition-colors duration-300 ${theme === "light" ? "theme-light" : ""}`}
+        style={{
+          background: "var(--g-bg)",
+        }}
+      >
+        {/* status bar spacer */}
+        <div style={{ height: "env(safe-area-inset-top, 0px)" }} />
+
+        {!loggedIn ? (
+          <LoginScreen onLogin={() => setLoggedIn(true)} />
+        ) : (
+          <div className="flex flex-col h-full min-h-0">
+            {!bare && (
+              <div style={{ paddingTop: 8 }}>
+                <Header
+                  notifications={2}
+                  onBell={() => go("alerts")}
+                  onMenu={() => setMenuOpen(true)}
+                />
+              </div>
+            )}
+
+            <div className="flex-1 min-h-0 overflow-y-auto">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={screen}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.22 }}
+                  className={bare ? "h-full" : ""}
+                >
+                  {renderScreen()}
+                </motion.div>
+              </AnimatePresence>
+            </div>
+
+            <Menu open={menuOpen} onClose={() => setMenuOpen(false)} current={screen as ScreenKey} onNavigate={go} />
+          </div>
+        )}
+
+        {/* navigation bar spacer */}
+        <div style={{ height: "env(safe-area-inset-bottom, 0px)" }} />
+
+        {/* Floating Discrete Button */}
+        <AnimatePresence>
+          {showDiscreteButton && (
+            <motion.div
+              drag
+              dragConstraints={containerRef}
+              dragElastic={0.1}
+              dragMomentum={false}
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: pressing ? 0.95 : 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              className="absolute select-none"
+              style={{
+                bottom: 100, // Above menu
+                right: 20,
+                zIndex: 50,
+                WebkitTapHighlightColor: "transparent", touchAction: "none"
+              }}
+            >
+              <div
+                onPointerDown={handlePointerDown}
+                onPointerUp={handlePointerUpOrCancel}
+                onPointerLeave={handlePointerUpOrCancel}
+                onPointerCancel={handlePointerUpOrCancel}
+                onContextMenu={(e) => e.preventDefault()}
+                className="relative flex items-center justify-center rounded-full"
+                style={{
+                  width: 56,
+                  height: 56,
+                  background: "var(--g-surface)",
+                  boxShadow: "0 8px 32px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.05)",
+                  border: "1px solid var(--g-surface-2)",
+                  cursor: "pointer",
+                  fontSize: 26
+                }}
+              >
+                <motion.span
+                  animate={{
+                    scale: pressing ? 0.9 : 1,
+                    filter: pressing ? "brightness(0.8)" : "brightness(1)"
+                  }}
+                  transition={{ duration: 0.2 }}
+                >
+                  {discreteEmoji}
+                </motion.span>
+                
+                {/* Subtle progress ring */}
+                <svg className="absolute inset-0 pointer-events-none" width="56" height="56" viewBox="0 0 56 56">
+                  <motion.circle
+                    cx="28" cy="28" r="26"
+                    fill="none"
+                    stroke="var(--g-sos)"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeDasharray="163.36" // 2 * pi * 26
+                    initial={{ pathLength: 0 }}
+                    animate={progressControls}
+                    style={{
+                      rotate: -90,
+                      transformOrigin: "50% 50%",
+                      opacity: pressing ? 0.8 : 0
+                    }}
+                  />
+                </svg>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </div>
+  );
+}

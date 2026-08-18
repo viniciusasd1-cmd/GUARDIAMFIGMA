@@ -1,0 +1,7 @@
+--- src/app/App.tsx
++++ src/app/App.tsx
+@@ -102,7 +102,7 @@
+   return (
+-    <div className="size-full flex items-center justify-center" style={{ background: "#05080F" }}>
++    <div className="size-full flex items-center justify-center" style={{ background: theme === "light" ? "#E0E5EC" : "#05080F", transition: "background 0.3s" }}>
+       {/* Phone frame */}

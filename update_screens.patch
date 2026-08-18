@@ -1,0 +1,108 @@
+--- src/app/components/guardiam/screens.tsx
++++ src/app/components/guardiam/screens.tsx
+@@ -16,6 +16,9 @@
+   BellRing,
+   Eye,
+   LogOut,
+   ChevronLeft,
++  Ghost,
++  ToggleLeft,
++  ToggleRight,
++  Check
+ } from "lucide-react";
+ import {
+@@ -351,6 +354,7 @@
+ export function SettingsScreen({ onBack, onLogout, onNav }: { onBack: () => void; onLogout: () => void; onNav: (s: any) => void }) {
+   const groups = [
+     { label: "Perfil", icon: User, tone: "brand" },
++    { label: "Botão de proteção discreto", icon: Ghost, tone: "active", nav: "discrete-settings" },
+     { label: "Contatos", icon: Users, tone: "brand", nav: "contacts" },
+     { label: "Permissões", icon: MapPin, tone: "active" },
+     { label: "Notificações", icon: BellRing, tone: "warn" },
+@@ -391,3 +395,85 @@
+     </div>
+   );
+ }
++
++/* ================================================================== */
++/* DISCRETE BUTTON SETTINGS                                            */
++/* ================================================================== */
++export function DiscreteButtonSettingsScreen({
++  enabled,
++  onToggleEnabled,
++  emoji,
++  onSetEmoji,
++  onBack,
++}: {
++  enabled: boolean;
++  onToggleEnabled: () => void;
++  emoji: string;
++  onSetEmoji: (e: string) => void;
++  onBack: () => void;
++}) {
++  const emojis = ["🛡️", "❤️", "🫶", "🙂", "⭐", "🌙", "🎵", "☕"];
++
++  return (
++    <div className="pb-6">
++      <ScreenTitle title="Botão discreto" subtitle="Um controle camuflado para acionar o SOS discretamente." onBack={onBack} />
++      
++      <div className="px-5 mt-4">
++        <Card onClick={onToggleEnabled} className="p-4 flex items-center justify-between cursor-pointer">
++          <div>
++            <div style={{ color: "var(--g-text)", fontWeight: 600, fontSize: 16 }}>Ativar botão discreto</div>
++            <div style={{ color: "var(--g-text-3)", fontSize: 13, marginTop: 2 }}>Botão flutuante na tela inicial</div>
++          </div>
++          <div style={{ color: enabled ? "var(--g-active)" : "var(--g-text-3)" }}>
++            {enabled ? <ToggleRight size={36} weight="fill" /> : <ToggleLeft size={36} />}
++          </div>
++        </Card>
++      </div>
++
++      <AnimatePresence>
++        {enabled && (
++          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
++            <SectionTitle>Aparência do botão</SectionTitle>
++            <div className="px-5">
++              <Card className="p-4">
++                <p style={{ color: "var(--g-text-2)", fontSize: 14, marginBottom: 16, lineHeight: 1.5 }}>
++                  Escolha um emoji para camuflar o botão. Ninguém além de você saberá sua real função.
++                </p>
++                <div className="grid grid-cols-4 gap-3">
++                  {emojis.map(e => (
++                    <button
++                      key={e}
++                      onClick={() => onSetEmoji(e)}
++                      className="relative flex items-center justify-center rounded-[14px] transition-all"
++                      style={{
++                        height: 64,
++                        fontSize: 28,
++                        background: emoji === e ? "var(--g-brand-soft)" : "var(--g-surface-2)",
++                        border: emoji === e ? "2px solid var(--g-brand)" : "2px solid transparent",
++                      }}
++                    >
++                      {e}
++                      {emoji === e && (
++                        <div className="absolute -top-1.5 -right-1.5 rounded-full p-0.5" style={{ background: "var(--g-brand)", color: "#000" }}>
++                          <Check size={12} strokeWidth={4} />
++                        </div>
++                      )}
++                    </button>
++                  ))}
++                </div>
++              </Card>
++            </div>
++
++            <SectionTitle>Como usar</SectionTitle>
++            <div className="px-5">
++              <Card className="p-4">
++                <div style={{ color: "var(--g-text)", fontSize: 14, lineHeight: 1.6 }}>
++                  <strong>Pressione e segure por 3 segundos</strong> sobre o emoji para acionar o SOS imediatamente, sem confirmar.
++                </div>
++              </Card>
++            </div>
++          </motion.div>
++        )}
++      </AnimatePresence>
++    </div>
++  );
++}

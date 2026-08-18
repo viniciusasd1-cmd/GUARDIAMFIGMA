@@ -1,0 +1,512 @@
+import { useEffect, useState } from "react";
+import { AnimatePresence, motion } from "motion/react";
+import {
+  Shield,
+  ShieldCheck,
+  MapPin,
+  Users,
+  Bell,
+  Navigation,
+  Radio,
+  Plus,
+  ChevronRight,
+  CheckCircle2,
+  Clock,
+  User,
+  Fingerprint,
+  BellRing,
+  Eye,
+  LogOut,
+  ChevronLeft,
+  Ghost,
+  ToggleLeft,
+  ToggleRight,
+  Check
+} from "lucide-react";
+import {
+  Card,
+  PrimaryButton,
+  SecondaryButton,
+  StatusBadge,
+  MetricCard,
+  AlertCard,
+  ContactCard,
+  EmptyState,
+} from "./ui";
+import { SOSButton } from "./interactive";
+import type { Contact, Alert } from "./data";
+
+/* Shared section title */
+function SectionTitle({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="px-5 mb-3 mt-6" style={{ color: "var(--g-text-2)", fontSize: 13, fontWeight: 600, letterSpacing: "0.04em" }}>
+      {children}
+    </div>
+  );
+}
+
+function ScreenTitle({ title, subtitle, onBack }: { title: string; subtitle?: string; onBack?: () => void }) {
+  return (
+    <div className="px-5 pt-1 pb-2">
+      {onBack && (
+        <button onClick={onBack} className="flex items-center gap-1 mb-3 active:scale-95 transition-transform" style={{ color: "var(--g-text-2)", fontSize: 14 }}>
+          <ChevronLeft size={18} /> Voltar
+        </button>
+      )}
+      <h1 className="g-font-display" style={{ color: "var(--g-text)", fontWeight: 800, fontSize: 24 }}>{title}</h1>
+      {subtitle && <p style={{ color: "var(--g-text-3)", fontSize: 14, marginTop: 4 }}>{subtitle}</p>}
+    </div>
+  );
+}
+
+/* ================================================================== */
+/* HOME                                                                */
+/* ================================================================== */
+export function HomeScreen({
+  active,
+  contactsCount,
+  onActivate,
+  onOpenActive,
+  onNav,
+}: {
+  active: boolean;
+  contactsCount: number;
+  onActivate: () => void;
+  onOpenActive: () => void;
+  onNav: (s: any) => void;
+}) {
+  return (
+    <div className="pb-6">
+      <div className="px-5 pt-1 pb-1">
+        <p style={{ color: "var(--g-text-2)", fontSize: 15 }}>Olá, Ana 👋</p>
+        <h1 className="g-font-display" style={{ color: "var(--g-text)", fontWeight: 800, fontSize: 23, marginTop: 2 }}>
+          Sua central de proteção pessoal
+        </h1>
+      </div>
+
+      {/* STATUS CARD */}
+      <div className="px-5 mt-4">
+        <Card raised className="p-5" style={active ? { border: "1px solid rgba(47,217,138,0.4)" } : { border: "1px solid rgba(255,194,75,0.35)" }}>
+          <div className="flex items-center justify-between">
+            <StatusBadge tone={active ? "active" : "warn"} pulse={active}>
+              {active ? "PROTEÇÃO ATIVA" : "PROTEÇÃO DESATIVADA"}
+            </StatusBadge>
+            <div
+              className="flex items-center justify-center rounded-full"
+              style={{
+                width: 46,
+                height: 46,
+                background: active ? "var(--g-active-soft)" : "var(--g-warn-soft)",
+                color: active ? "var(--g-active)" : "var(--g-warn)",
+              }}
+            >
+              {active ? <ShieldCheck size={24} /> : <Shield size={24} />}
+            </div>
+          </div>
+
+          <p style={{ color: "var(--g-text-2)", fontSize: 14, marginTop: 16, lineHeight: 1.5 }}>
+            {active
+              ? "Você está protegido. Localização e tracking em tempo real ativos."
+              : "Ative para compartilhar sua localização e liberar o SOS quando precisar."}
+          </p>
+
+          {active && (
+            <div className="flex items-center gap-4 mt-4">
+              <span className="flex items-center gap-1.5" style={{ color: "var(--g-active)", fontSize: 13, fontWeight: 500 }}>
+                <MapPin size={14} /> Localização ativa
+              </span>
+              <span className="flex items-center gap-1.5" style={{ color: "var(--g-active)", fontSize: 13, fontWeight: 500 }}>
+                <Radio size={14} /> Tracking ativo
+              </span>
+            </div>
+          )}
+
+          <div className="mt-5">
+            {active ? (
+              <PrimaryButton tone="active" icon={ShieldCheck} onClick={onOpenActive}>
+                Ver Modo Proteção
+              </PrimaryButton>
+            ) : (
+              <PrimaryButton icon={Shield} onClick={onActivate}>
+                Ativar proteção
+              </PrimaryButton>
+            )}
+          </div>
+        </Card>
+      </div>
+
+      {/* OVERVIEW */}
+      <SectionTitle>Visão geral</SectionTitle>
+      <div className="px-5 flex gap-3">
+        <MetricCard icon={Users} label="Contatos" value={String(contactsCount)} tone="brand" onClick={() => onNav("contacts")} />
+        <MetricCard icon={MapPin} label="Localização" value={active ? "Ativa" : "Off"} tone={active ? "active" : "neutral"} />
+        <MetricCard icon={Bell} label="Alertas" value="3" tone="warn" onClick={() => onNav("alerts")} />
+      </div>
+
+      {/* Quick access */}
+      <div className="px-5 mt-3">
+        <Card onClick={active ? onOpenActive : onActivate} className="p-4 flex items-center gap-3">
+          <div className="flex items-center justify-center rounded-[12px]" style={{ width: 40, height: 40, background: "var(--g-brand-soft)", color: "var(--g-brand)" }}>
+            <ShieldCheck size={20} />
+          </div>
+          <div className="flex-1">
+            <div style={{ color: "var(--g-text)", fontWeight: 600, fontSize: 15 }}>Modo Proteção</div>
+            <div style={{ color: "var(--g-text-3)", fontSize: 13 }}>Acesse SOS e tracking</div>
+          </div>
+          <ChevronRight size={20} style={{ color: "var(--g-text-3)" }} />
+        </Card>
+      </div>
+    </div>
+  );
+}
+
+/* ================================================================== */
+/* ACTIVATION                                                          */
+/* ================================================================== */
+export function ActivationScreen({ contactsCount, onActivate, onBack }: { contactsCount: number; onActivate: () => void; onBack: () => void }) {
+  const rows = [
+    { icon: Users, label: "Contatos de segurança", value: `${contactsCount} configurados`, tone: "brand" as const },
+    { icon: MapPin, label: "Localização", value: "Permitida", tone: "active" as const },
+    { icon: Bell, label: "Alertas", value: "Prontos", tone: "brand" as const },
+  ];
+  return (
+    <div className="flex flex-col h-full pb-6">
+      <ScreenTitle title="Ativar proteção" onBack={onBack} />
+      <div className="px-5 mt-2">
+        <Card raised className="p-6 text-center">
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="mx-auto flex items-center justify-center rounded-full mb-4"
+            style={{ width: 82, height: 82, background: "var(--g-brand-soft)", color: "var(--g-brand)" }}
+          >
+            <Shield size={40} />
+          </motion.div>
+          <h2 className="g-font-display" style={{ color: "var(--g-text)", fontWeight: 700, fontSize: 19, lineHeight: 1.4 }}>
+            O GUARDIAM está pronto<br />para proteger você
+          </h2>
+          <p style={{ color: "var(--g-text-3)", fontSize: 14, marginTop: 8 }}>
+            Confira o que será ativado antes de começar.
+          </p>
+        </Card>
+      </div>
+
+      <div className="px-5 mt-3 flex flex-col gap-3">
+        {rows.map((r) => (
+          <Card key={r.label} className="p-4 flex items-center gap-3">
+            <div className="flex items-center justify-center rounded-[12px]" style={{ width: 40, height: 40, background: "var(--g-surface-3)", color: `var(--g-${r.tone === "active" ? "active" : "brand"})` }}>
+              <r.icon size={20} />
+            </div>
+            <div className="flex-1">
+              <div style={{ color: "var(--g-text)", fontWeight: 500, fontSize: 15 }}>{r.label}</div>
+            </div>
+            <StatusBadge tone={r.tone}>{r.value}</StatusBadge>
+          </Card>
+        ))}
+      </div>
+
+      <div className="px-5 mt-auto pt-6">
+        <PrimaryButton tone="active" icon={ShieldCheck} onClick={onActivate}>ATIVAR PROTEÇÃO</PrimaryButton>
+      </div>
+    </div>
+  );
+}
+
+/* ================================================================== */
+/* ACTIVE PROTECTION                                                   */
+/* ================================================================== */
+export function ActiveScreen({ onSOS, onDeactivate, onBack }: { onSOS: () => void; onDeactivate: () => void; onBack: () => void }) {
+  return (
+    <div className="flex flex-col pb-6">
+      <ScreenTitle title="Modo Proteção" onBack={onBack} />
+
+      <div className="px-5">
+        <Card raised className="p-4" style={{ border: "1px solid rgba(47,217,138,0.4)" }}>
+          <div className="flex items-center justify-between">
+            <StatusBadge tone="active" pulse>PROTEÇÃO ATIVA</StatusBadge>
+            <span style={{ color: "var(--g-text-3)", fontSize: 12 }}>Atualizado agora</span>
+          </div>
+          <div className="grid grid-cols-2 gap-3 mt-4">
+            {[
+              { icon: MapPin, label: "Localização", value: "ATIVA" },
+              { icon: Radio, label: "Tracking", value: "ATIVO" },
+            ].map((s) => (
+              <div key={s.label} className="rounded-[14px] p-3" style={{ background: "var(--g-surface)" }}>
+                <div className="flex items-center gap-1.5" style={{ color: "var(--g-active)", fontSize: 12 }}>
+                  <s.icon size={14} /> {s.label}
+                </div>
+                <div style={{ color: "var(--g-text)", fontWeight: 700, fontSize: 16, marginTop: 4, fontFamily: "Manrope" }}>{s.value}</div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-3 rounded-[14px] p-3 flex items-center gap-2.5" style={{ background: "var(--g-surface)" }}>
+            <Navigation size={16} style={{ color: "var(--g-brand)" }} />
+            <div>
+              <div style={{ color: "var(--g-text)", fontSize: 13 }}>Av. Paulista, 1500 — São Paulo</div>
+              <div style={{ color: "var(--g-text-3)", fontSize: 12 }}>Última atualização: há 12 segundos</div>
+            </div>
+          </div>
+        </Card>
+      </div>
+
+      <div className="mt-8">
+        <SOSButton onTrigger={onSOS} />
+      </div>
+
+      <div className="px-5 mt-8">
+        <SecondaryButton tone="warn" onClick={onDeactivate}>Desativar proteção</SecondaryButton>
+      </div>
+    </div>
+  );
+}
+
+/* ================================================================== */
+/* SOS FLOW                                                            */
+/* ================================================================== */
+export function SOSScreen({ onSafe, onBack }: { onSafe: () => void; onBack: () => void }) {
+  const [phase, setPhase] = useState<"triggering" | "triggered">("triggering");
+
+  useEffect(() => {
+    const t = setTimeout(() => setPhase("triggered"), 2200);
+    return () => clearTimeout(t);
+  }, []);
+
+  return (
+    <div className="flex flex-col items-center justify-center h-full px-6 text-center">
+      <AnimatePresence mode="wait">
+        {phase === "triggering" ? (
+          <motion.div key="t" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col items-center">
+            <div className="relative flex items-center justify-center" style={{ width: 140, height: 140 }}>
+              {[0, 1, 2].map((i) => (
+                <motion.span
+                  key={i}
+                  className="absolute rounded-full"
+                  style={{ inset: 0, border: "2px solid var(--g-sos)" }}
+                  animate={{ scale: [0.6, 1.6], opacity: [0.8, 0] }}
+                  transition={{ duration: 1.8, repeat: Infinity, delay: i * 0.6 }}
+                />
+              ))}
+              <div className="flex items-center justify-center rounded-full" style={{ width: 90, height: 90, background: "var(--g-sos)", color: "#fff" }}>
+                <BellRing size={38} />
+              </div>
+            </div>
+            <h1 className="g-font-display mt-8" style={{ color: "var(--g-text)", fontWeight: 800, fontSize: 24 }}>Acionando SOS...</h1>
+            <p style={{ color: "var(--g-text-2)", fontSize: 15, marginTop: 8 }}>Preparando o alerta e sua localização.</p>
+          </motion.div>
+        ) : (
+          <motion.div key="d" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col items-center w-full">
+            <motion.div
+              initial={{ scale: 0.6 }} animate={{ scale: 1 }} transition={{ type: "spring", damping: 12 }}
+              className="flex items-center justify-center rounded-full" style={{ width: 96, height: 96, background: "var(--g-sos-soft)", color: "var(--g-sos)" }}
+            >
+              <CheckCircle2 size={46} />
+            </motion.div>
+            <h1 className="g-font-display mt-6" style={{ color: "var(--g-text)", fontWeight: 800, fontSize: 24 }}>Alerta acionado</h1>
+            <p style={{ color: "var(--g-text-2)", fontSize: 15, marginTop: 8, maxWidth: 280 }}>
+              Seus contatos de segurança serão avisados com sua localização.
+            </p>
+
+            <Card className="p-4 mt-8 w-full text-left">
+              {[
+                { icon: Clock, label: "Horário", value: "21:14 · Hoje" },
+                { icon: MapPin, label: "Localização", value: "Av. Paulista, 1500" },
+                { icon: Radio, label: "Status", value: "Enviado aos contatos" },
+              ].map((r) => (
+                <div key={r.label} className="flex items-center gap-3 py-2">
+                  <r.icon size={17} style={{ color: "var(--g-sos)" }} />
+                  <span style={{ color: "var(--g-text-3)", fontSize: 13, width: 84 }}>{r.label}</span>
+                  <span style={{ color: "var(--g-text)", fontSize: 14, fontWeight: 500 }}>{r.value}</span>
+                </div>
+              ))}
+            </Card>
+
+            <div className="w-full mt-6">
+              <PrimaryButton tone="active" icon={CheckCircle2} onClick={onSafe}>Estou em segurança agora</PrimaryButton>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+/* ================================================================== */
+/* CONTACTS                                                            */
+/* ================================================================== */
+export function ContactsScreen({ contacts, onBack }: { contacts: Contact[]; onBack: () => void }) {
+  return (
+    <div className="pb-6">
+      <ScreenTitle title="Contatos de segurança" subtitle="Estas pessoas poderão ser avisadas quando você precisar." onBack={onBack} />
+      <div className="px-5 mt-2 flex flex-col gap-3">
+        {contacts.length === 0 ? (
+          <EmptyState icon={Users} title="Nenhum contato" description="Adicione pessoas de confiança para acionar em uma emergência." action={<PrimaryButton icon={Plus}>Adicionar contato</PrimaryButton>} />
+        ) : (
+          <>
+            {contacts.map((c) => (
+              <ContactCard key={c.id} name={c.name} phone={c.phone} primary={c.primary} initials={c.initials} />
+            ))}
+            <div className="mt-2">
+              <SecondaryButton icon={Plus}>Adicionar contato</SecondaryButton>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ================================================================== */
+/* ALERTS                                                              */
+/* ================================================================== */
+export function AlertsScreen({ alerts, onBack }: { alerts: Alert[]; onBack: () => void }) {
+  return (
+    <div className="pb-6">
+      <ScreenTitle title="Alertas" subtitle="Histórico das suas ativações e ocorrências." onBack={onBack} />
+      <div className="px-5 mt-2 flex flex-col gap-3">
+        {alerts.length === 0 ? (
+          <EmptyState icon={Bell} title="Sem alertas" description="Quando você acionar o SOS ou a proteção, o histórico aparecerá aqui." />
+        ) : (
+          alerts.map((a) => (
+            <AlertCard key={a.id} title={a.title} time={a.time} location={a.location} status={a.status} tone={a.tone} />
+          ))
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ================================================================== */
+/* SETTINGS                                                            */
+/* ================================================================== */
+export function SettingsScreen({ onBack, onLogout, onNav }: { onBack: () => void; onLogout: () => void; onNav: (s: any) => void }) {
+  const groups = [
+    { label: "Perfil", icon: User, tone: "brand" },
+    { label: "Botão discreto", icon: Ghost, tone: "active", nav: "discrete-settings" },
+    { label: "Contatos", icon: Users, tone: "brand", nav: "contacts" },
+    { label: "Permissões", icon: MapPin, tone: "active" },
+    { label: "Notificações", icon: BellRing, tone: "warn" },
+    { label: "Privacidade", icon: Eye, tone: "brand" },
+    { label: "Segurança", icon: Fingerprint, tone: "brand" },
+  ] as const;
+  return (
+    <div className="pb-6">
+      <ScreenTitle title="Configurações" onBack={onBack} />
+      <div className="px-5 mt-2">
+        <Card className="p-4 flex items-center gap-3">
+          <div className="flex items-center justify-center rounded-full" style={{ width: 52, height: 52, background: "linear-gradient(135deg, var(--g-brand), var(--g-brand-2))", color: "#04101F", fontWeight: 700, fontFamily: "Manrope", fontSize: 18 }}>
+            AN
+          </div>
+          <div className="flex-1">
+            <div style={{ color: "var(--g-text)", fontWeight: 600, fontSize: 16 }}>Ana Nunes</div>
+            <div style={{ color: "var(--g-text-3)", fontSize: 13 }}>voce@guardiam.app</div>
+          </div>
+          <ChevronRight size={20} style={{ color: "var(--g-text-3)" }} />
+        </Card>
+      </div>
+
+      <div className="px-5 mt-4 flex flex-col gap-2">
+        {groups.map((g) => (
+          <Card key={g.label} onClick={g.nav ? () => onNav(g.nav) : undefined} className="p-3.5 flex items-center gap-3">
+            <div className="flex items-center justify-center rounded-[12px]" style={{ width: 38, height: 38, background: "var(--g-surface-3)", color: `var(--g-${g.tone})` }}>
+              <g.icon size={19} />
+            </div>
+            <span className="flex-1" style={{ color: "var(--g-text)", fontSize: 15 }}>{g.label}</span>
+            <ChevronRight size={19} style={{ color: "var(--g-text-3)" }} />
+          </Card>
+        ))}
+      </div>
+
+      <div className="px-5 mt-4">
+        <Card onClick={onLogout} className="p-3.5 flex items-center gap-3">
+          <div className="flex items-center justify-center rounded-[12px]" style={{ width: 38, height: 38, background: "var(--g-sos-soft)", color: "var(--g-sos)" }}>
+            <LogOut size={19} />
+          </div>
+          <span className="flex-1" style={{ color: "var(--g-sos)", fontSize: 15, fontWeight: 500 }}>Sair</span>
+        </Card>
+      </div>
+    </div>
+  );
+}
+
+/* ================================================================== */
+/* DISCRETE BUTTON SETTINGS                                            */
+/* ================================================================== */
+export function DiscreteButtonSettingsScreen({
+  enabled,
+  onToggleEnabled,
+  emoji,
+  onSetEmoji,
+  onBack,
+}: {
+  enabled: boolean;
+  onToggleEnabled: () => void;
+  emoji: string;
+  onSetEmoji: (e: string) => void;
+  onBack: () => void;
+}) {
+  const emojis = ["🛡️", "❤️", "🫶", "🙂", "⭐", "🌙", "🎵", "☕"];
+
+  return (
+    <div className="pb-6">
+      <ScreenTitle title="Botão discreto" subtitle="Um controle camuflado para acionar o SOS." onBack={onBack} />
+      
+      <div className="px-5 mt-4">
+        <Card onClick={onToggleEnabled} className="p-4 flex items-center justify-between cursor-pointer">
+          <div>
+            <div style={{ color: "var(--g-text)", fontWeight: 600, fontSize: 16 }}>Ativar botão discreto</div>
+            <div style={{ color: "var(--g-text-3)", fontSize: 13, marginTop: 2 }}>Botão flutuante na tela inicial</div>
+          </div>
+          <div style={{ color: enabled ? "var(--g-active)" : "var(--g-text-3)" }}>
+            {enabled ? <ToggleRight size={36} /> : <ToggleLeft size={36} />}
+          </div>
+        </Card>
+      </div>
+
+      <AnimatePresence>
+        {enabled && (
+          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
+            <SectionTitle>Aparência do botão</SectionTitle>
+            <div className="px-5">
+              <Card className="p-4">
+                <p style={{ color: "var(--g-text-2)", fontSize: 14, marginBottom: 16, lineHeight: 1.5 }}>
+                  Escolha um emoji para camuflar o botão. Ninguém além de você saberá sua real função.
+                </p>
+                <div className="grid grid-cols-4 gap-3">
+                  {emojis.map(e => (
+                    <button
+                      key={e}
+                      onClick={() => onSetEmoji(e)}
+                      className="relative flex items-center justify-center rounded-[14px] transition-all"
+                      style={{
+                        height: 64,
+                        fontSize: 28,
+                        background: emoji === e ? "var(--g-brand-soft)" : "var(--g-surface-2)",
+                        border: emoji === e ? "2px solid var(--g-brand)" : "2px solid transparent",
+                      }}
+                    >
+                      {e}
+                      {emoji === e && (
+                        <div className="absolute -top-1.5 -right-1.5 rounded-full p-0.5" style={{ background: "var(--g-brand)", color: "#000" }}>
+                          <Check size={12} strokeWidth={4} />
+                        </div>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </Card>
+            </div>
+
+            <SectionTitle>Como usar</SectionTitle>
+            <div className="px-5">
+              <Card className="p-4">
+                <div style={{ color: "var(--g-text)", fontSize: 14, lineHeight: 1.6 }}>
+                  <strong>Pressione e segure por 3 segundos</strong> sobre o emoji para acionar o SOS imediatamente. O botão emitirá um progresso sutil e vibrará.
+                </div>
+              </Card>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}

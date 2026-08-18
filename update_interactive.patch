@@ -1,0 +1,12 @@
+--- src/app/components/guardiam/interactive.tsx
++++ src/app/components/guardiam/interactive.tsx
+@@ -19,7 +19,8 @@
+   | "sos"
+   | "contacts"
+   | "alerts"
+-  | "settings";
++  | "settings"
++  | "discrete-settings";
+ 
+ const items: { key: ScreenKey; label: string; icon: LucideIcon }[] = [
+   { key: "home", label: "Início", icon: Home },

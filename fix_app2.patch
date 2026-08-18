@@ -1,0 +1,25 @@
+--- src/app/App.tsx
++++ src/app/App.tsx
+@@ -73,6 +73,8 @@
+             onBack={() => go("settings")}
+           />
+         );
++      case "fake-call":
++        return <FakeCallScreen onEnd={() => go("home")} />;
+     }
+   };
+ 
+@@ -80,7 +82,7 @@
+-  const bare = screen === "sos";
++  const bare = screen === "sos" || screen === "fake-call";
+ 
+   // Discrete Button Logic
+   const [pressing, setPressing] = useState(false);
+@@ -107,7 +109,7 @@
+   };
+ 
+   // Only show discrete button if enabled, logged in, and not in SOS screen
+-  const showDiscreteButton = loggedIn && discreteEnabled && screen !== "sos" && screen !== "discrete-settings";
++  const showDiscreteButton = loggedIn && discreteEnabled && screen !== "sos" && screen !== "discrete-settings" && screen !== "fake-call";
+ 
+   const containerRef = useRef<HTMLDivElement>(null);

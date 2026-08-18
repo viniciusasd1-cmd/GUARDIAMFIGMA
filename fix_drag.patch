@@ -1,0 +1,11 @@
+--- src/app/App.tsx
++++ src/app/App.tsx
+@@ -155,7 +155,7 @@
+           {showDiscreteButton && (
+             <motion.div
+               drag
+-              dragConstraints={{ top: -700, bottom: -20, left: -340, right: 10 }}
++              dragConstraints={containerRef}
+               dragElastic={0.1}
+               dragMomentum={false}
+               initial={{ opacity: 0, scale: 0.8 }}

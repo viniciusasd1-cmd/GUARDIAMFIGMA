@@ -1,0 +1,43 @@
+--- src/app/App.tsx
++++ src/app/App.tsx
+@@ -10,7 +10,8 @@
+   ContactsScreen,
+   AlertsScreen,
+   SettingsScreen,
+-  DiscreteButtonSettingsScreen
++  DiscreteButtonSettingsScreen,
+ } from "./components/guardiam/screens";
++import { FakeCallScreen } from "./components/guardiam/V2Components";
+ import { LoginScreen } from "./components/guardiam/LoginScreen";
+ import { initialContacts, initialAlerts } from "./components/guardiam/data";
+ 
+@@ -21,7 +22,7 @@
+ export default function App() {
+   const [loggedIn, setLoggedIn] = useState(false);
+-  const [screen, setScreen] = useState<ScreenKey | "discrete-settings">("home");
++  const [screen, setScreen] = useState<ScreenKey | "discrete-settings" | "fake-call">("home");
+   const [menuOpen, setMenuOpen] = useState(false);
+   const [active, setActive] = useState(false);
+   const [theme, setTheme] = useState<"dark" | "light">("dark");
+@@ -70,6 +71,8 @@
+             onBack={() => go("settings")}
+           />
+         );
++      case "fake-call":
++        return <FakeCallScreen onEnd={() => go("home")} />;
+     }
+   };
+ 
+   // Full-bleed screens (no app header): login + sos
+-  const bare = screen === "sos";
++  const bare = screen === "sos" || screen === "fake-call";
+ 
+   // Discrete Button Logic
+@@ -106,7 +109,7 @@
+   };
+ 
+   // Only show discrete button if enabled, logged in, and not in SOS screen
+-  const showDiscreteButton = loggedIn && discreteEnabled && screen !== "sos" && screen !== "discrete-settings";
++  const showDiscreteButton = loggedIn && discreteEnabled && screen !== "sos" && screen !== "discrete-settings" && screen !== "fake-call";
+ 
+   const containerRef = useRef<HTMLDivElement>(null);

@@ -1,0 +1,10 @@
+--- App.tsx
++++ App.tsx
+@@ -21,6 +21,7 @@
+ export default function App() {
+   const [loggedIn, setLoggedIn] = useState(false);
+   const [screen, setScreen] = useState<ScreenKey | "discrete-settings">("home");
+   const [menuOpen, setMenuOpen] = useState(false);
+   const [active, setActive] = useState(false);
++  const [theme, setTheme] = useState<"dark" | "light">("dark");
+ 

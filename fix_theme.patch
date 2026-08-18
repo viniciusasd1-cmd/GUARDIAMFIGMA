@@ -1,0 +1,43 @@
+--- src/styles/theme.css
++++ src/styles/theme.css
+@@ -148,6 +148,40 @@
+   --g-shadow-md: 0 10px 30px rgba(0,0,0,0.35);
+   --g-shadow-glow-active: 0 0 0 6px var(--g-active-soft);
+   --g-shadow-glow-sos: 0 10px 40px rgba(255,90,95,0.45);
++}
++
++/* Light theme overrides for GUARDIAM */
++.theme-light {
++  /* Surfaces (light scale) */
++  --g-bg:        #F4F7FC; /* app background */
++  --g-surface:   #FFFFFF; /* base card surface */
++  --g-surface-2: #E8EEF8; /* raised card */
++  --g-surface-3: #D3DFEF; /* hover / active surface */
++  --g-border:    #E0E7F1; /* hairline borders */
++  --g-border-strong: #C4D2E5;
++
++  /* Text */
++  --g-text:      #0B1424; /* primary text */
++  --g-text-2:    #475569; /* secondary */
++  --g-text-3:    #768499; /* muted / captions */
++
++  /* Brand & actions (adjusted for contrast) */
++  --g-brand:     #1B6EE0;
++  --g-brand-2:   #06A4AC;
++  --g-brand-soft: rgba(27,110,224,0.12);
++
++  /* Semantic states */
++  --g-active:    #16A360; /* protection active — green */
++  --g-active-soft: rgba(22,163,96,0.12);
++  --g-warn:      #D97706; /* attention — yellow/orange */
++  --g-warn-soft: rgba(217,119,6,0.12);
++  --g-sos:       #E0242E; /* SOS — red */
++  --g-sos-2:     #C01921;
++  --g-sos-soft:  rgba(224,36,46,0.12);
++
++  /* Shadows for light theme */
++  --g-shadow-sm: 0 2px 8px rgba(0,0,0,0.06);
++  --g-shadow-md: 0 10px 30px rgba(0,0,0,0.1);
+ }
+ 
+ @layer base {

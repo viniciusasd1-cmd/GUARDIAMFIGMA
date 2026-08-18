@@ -1,0 +1,19 @@
+--- src/app/App.tsx
++++ src/app/App.tsx
+@@ -21,6 +21,7 @@
+ export default function App() {
+   const [loggedIn, setLoggedIn] = useState(false);
+   const [screen, setScreen] = useState<ScreenKey | "discrete-settings">("home");
+   const [menuOpen, setMenuOpen] = useState(false);
+   const [active, setActive] = useState(false);
++  const [theme, setTheme] = useState<"dark" | "light">("dark");
+ 
+   const [contacts] = useState(initialContacts);
+@@ -60,7 +61,7 @@
+       case "alerts":
+         return <AlertsScreen alerts={alerts} onBack={() => go("home")} />;
+       case "settings":
+-        return <SettingsScreen onBack={() => go("home")} onNav={go} onLogout={() => setLoggedIn(false)} />;
++        return <SettingsScreen onBack={() => go("home")} onNav={go} onLogout={() => setLoggedIn(false)} theme={theme} onToggleTheme={() => setTheme(theme === "dark" ? "light" : "dark")} />;
+       case "discrete-settings":
+         return (
