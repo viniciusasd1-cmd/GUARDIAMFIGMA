@@ -64,17 +64,17 @@
 }
 
 .dark {
-  /* GUARDIAM Design System Tokens - Dark (Navy Base) */
-  --g-bg:        #0A1220;
-  --g-surface:   #101B2E;
-  --g-surface-2: #16233B;
-  --g-surface-3: #1E3050;
-  --g-border:    #24344F;
-  --g-border-strong: #33486B;
+  /* GUARDIAM Design System Tokens - Dark Idle (Neutral Graphite) */
+  --g-bg:        #111318;
+  --g-surface:   #181B21;
+  --g-surface-2: #20242C;
+  --g-surface-3: #252A33;
+  --g-border:    #2B313B;
+  --g-border-strong: #2B313B;
 
-  --g-text:      #F5F8FF;
-  --g-text-2:    #A9B7CE;
-  --g-text-3:    #6B7C97;
+  --g-text:      #F5F7FA;
+  --g-text-2:    #A8B0BC;
+  --g-text-3:    #727C8B;
 
   --g-brand:     #2E8BFF;
   --g-brand-soft: rgba(46,139,255,0.14);
